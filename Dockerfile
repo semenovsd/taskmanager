@@ -9,3 +9,5 @@ COPY requirements.txt /APP_BASE_DIR
 RUN python -m pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . /APP_BASE_DIR
+
+RUN python manage.py makemigrations && python manage.py migrate

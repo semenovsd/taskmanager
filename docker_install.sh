@@ -15,10 +15,11 @@ sudo apt-get install docker-compose -y
 # Enable userns-remap on the daemon
 sudo echo "{
   \"userns-remap\": \"default\"
-}" > /etc/docker/daemon.json
+}" >/etc/docker/daemon.json
 sudo systemctl restart docker
 
-# TODO create ssl cert
+# Create ssl cert
+openssl req -newkey rsa:2048 -sha256 -nodes -keyout .ssh/url_private.key -x509 -days 365 -out .ssh/url_cert.pem
 
 # add group docker for run docker commands without sudo
 sudo groupadd docker

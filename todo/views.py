@@ -1,26 +1,38 @@
-from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
-
 
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from .permission import IsOwner
-from .serializer import TaskViewSerializer, TaskDetailsSerializer
+from .serializer import TaskViewSerializer, TaskDetailsSerializer, TaskLogsSerializer
 from .models import Task
 
 
 # Create your views here.
-# @csrf_exempt
+@csrf_exempt
 class TaskDetailsView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskDetailsSerializer
     queryset = Task.objects.all()
-    permission_classes = (IsAuthenticated, IsOwner, )
+    permission_classes = (IsOwner,)
 
 
 class TaskListView(generics.ListAPIView):
     serializer_class = TaskViewSerializer
-    queryset = Task.objects.all()
-    renderer_classes = (IsAuthenticated, IsAdminUser, )
+    permission_classes = (IsOwner,)
 
+
+class TaskFilterView(generics.ListAPIView):
+    serializer_class = TaskViewSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        """
+        This view should return the tasks
+        for the currently authenticated user.
+        """
+        task_filter = self.request.data.get('filter')
+        return Task.objects.filter(filter=task_filter)
+
+
+class TaskLogsView(generics.ListAPIView):
+    serializer_class = TaskLogsSerializer
+    permission_classes = (IsOwner,)

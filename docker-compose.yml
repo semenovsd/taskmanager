@@ -1,23 +1,15 @@
 version: '3.7'
 services:
-# имя контейнера, по которому к нему могут обращаться другие контейнеры
   db:
-    # название контейнера
     container_name: db
-    # название и версия используемого образа
-    image: postgres:12.3
-    # задаются значения переменных окружения. Значения подставляются из .env файла в тойже директории
+    image: postgres:13.0
     environment:
       POSTGRES_DB: $POSTGRES_DB
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-    # задаётся сеть к которой будет подключен контейнер
     networks:
       - test_backend
-    # условия перезапуска контейнера
     restart: always
-    # монтируется том к папке контейнера /var/lib/postgresql/data
-    # в случае уничтожения/пересборки контейнера все данные сохраняться локально
     volumes:
       - ./pgdata:/var/lib/postgresql/data
 
@@ -48,15 +40,13 @@ services:
       args:
         APP_BASE_DIR: $APP_BASE_DIR
     command: gunicorn taskmanager.wsgi:application --bind 0.0.0.0:$WEBAPP_PORT
-    # загружаем переменные окружения в контейнер
     env_file:
       - .env
     ports:
-      - $WEBAPP_PORT:$WEBHOOK_PORT
+      - $WEBAPP_PORT:$WEBAPP_PORT
     networks:
       - test_backend
     restart: always
-    # устанавливаем зависимость от db, что гарантирует запуск бд до запуска приложения
     depends_on:
       - db
 
@@ -67,7 +57,5 @@ services:
     depends_on:
       - web
 
-# указываются используемые сети
 networks:
   test_backend:
-    # указывается драйвер сети
