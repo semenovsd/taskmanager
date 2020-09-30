@@ -1,12 +1,14 @@
 version: '3.7'
+
 services:
+
   db:
     container_name: db
     image: postgres:13.0
     environment:
-      POSTGRES_DB: $POSTGRES_DB
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
     networks:
       - test_backend
     restart: always
@@ -19,14 +21,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: $PGADMIN_DEFAULT_EMAIL
       PGADMIN_DEFAULT_PASSWORD: $PGADMIN_DEFAULT_PASSWORD
-      PGADMIN_ENABLE_TLS: "True"
-    volumes:
-#      - ./pgadmin/tmp/servers.json:/pgadmin4/servers.json
-#      - ./pgadmin/private/var/lib/pgadmin:/var/lib/pgadmin
-      - ./$WEBHOOK_SSL_CERT:/certs/server.cert:ro
-      - ./$WEBHOOK_SSL_PRIV:/certs/server.key:ro
     ports:
-      - 8443:8443
+      - 8000:8000
     networks:
       - test_backend
     restart: always
@@ -39,23 +35,16 @@ services:
       context: ./$APP_BASE_DIR
       args:
         APP_BASE_DIR: $APP_BASE_DIR
-    command: gunicorn taskmanager.wsgi:application --bind 0.0.0.0:$WEBAPP_PORT
+    command: python manage.py runserver $WEBAPP_HOST:$WEBAPP_PORT
     env_file:
       - .env
-    ports:
-      - $WEBAPP_PORT:$WEBAPP_PORT
+    expose:
+      - $WEBAPP_PORT
     networks:
       - test_backend
     restart: always
     depends_on:
       - db
-
-  nginx:
-    build: ./nginx
-    ports:
-      - 80:80
-    depends_on:
-      - web
 
 networks:
   test_backend:
