@@ -27,5 +27,7 @@ sudo usermod -aG docker "${USER}"
 # Activate the changes to groups
 newgrp docker
 
+exit
+
 # Up docker containers
 docker-compose up --build
