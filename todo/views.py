@@ -4,10 +4,23 @@ from rest_framework.parsers import JSONParser
 
 
 from rest_framework import generics
-from .serializer import TaskDetailSerializer
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
+from .permission import IsOwner
+from .serializer import TaskViewSerializer, TaskDetailsSerializer
+from .models import Task
 
 
 # Create your views here.
 # @csrf_exempt
-class TaskCreateView(generics.CreateAPIView):
-    serializer_class = TaskDetailSerializer
+class TaskDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TaskDetailsSerializer
+    queryset = Task.objects.all()
+    permission_classes = (IsAuthenticated, IsOwner, )
+
+
+class TaskListView(generics.ListAPIView):
+    serializer_class = TaskViewSerializer
+    queryset = Task.objects.all()
+    renderer_classes = (IsAuthenticated, IsAdminUser, )
+

@@ -2,25 +2,15 @@ from rest_framework import serializers
 from .models import Task
 
 
-class TaskDetailSerializer(serializers.ModelSerializer):
+class TaskViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
 
 
-# class TaskAddSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Task
-#         fields = '__all__'
-#
-#
-# class TaskSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Task
-#         fields = '__all__'
+class TaskDetailsSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
-
-# class SnippetSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Snippet
-#         fields = ['id', 'title', 'code', 'linenos', 'language', 'style']
+    class Meta:
+        model = Task
+        fields = '__all__'
