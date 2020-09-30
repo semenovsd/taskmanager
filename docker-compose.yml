@@ -1,0 +1,66 @@
+version: '3.7'
+services:
+# имя контейнера, по которому к нему могут обращаться другие контейнеры
+  db:
+    # название контейнера
+    container_name: db
+    # название и версия используемого образа
+    image: postgres:12.3
+    # задаются значения переменных окружения. Значения подставляются из .env файла в тойже директории
+    environment:
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    # задаётся сеть к которой будет подключен контейнер
+    networks:
+      - test_backend
+    # условия перезапуска контейнера
+    restart: always
+    # монтируется том к папке контейнера /var/lib/postgresql/data
+    # в случае уничтожения/пересборки контейнера все данные сохраняться локально
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:4.23
+    environment:
+      PGADMIN_DEFAULT_EMAIL: $PGADMIN_DEFAULT_EMAIL
+      PGADMIN_DEFAULT_PASSWORD: $PGADMIN_DEFAULT_PASSWORD
+      PGADMIN_ENABLE_TLS: "True"
+    volumes:
+#      - ./pgadmin/tmp/servers.json:/pgadmin4/servers.json
+#      - ./pgadmin/private/var/lib/pgadmin:/var/lib/pgadmin
+      - ./$WEBHOOK_SSL_CERT:/certs/server.cert:ro
+      - ./$WEBHOOK_SSL_PRIV:/certs/server.key:ro
+    ports:
+      - 443:443
+    networks:
+      - test_backend
+    restart: always
+    depends_on:
+      - db
+
+  web:
+    container_name: web
+    build:
+      context: ./$APP_BASE_DIR
+      args:
+        APP_BASE_DIR: $APP_BASE_DIR
+    command: gunicorn taskmanager.wsgi:application --bind 0.0.0.0:$WEBAPP_PORT
+    # загружаем переменные окружения в контейнер
+    env_file:
+      - .env
+    ports:
+      - $WEBAPP_PORT:$WEBHOOK_PORT
+    networks:
+      - test_backend
+    restart: always
+    # устанавливаем зависимость от db, что гарантирует запуск бд до запуска приложения
+    depends_on:
+      - db
+
+# указываются используемые сети
+networks:
+  test_backend:
+    # указывается драйвер сети
