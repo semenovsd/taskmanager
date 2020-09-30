@@ -18,6 +18,8 @@ sudo echo "{
 }" > /etc/docker/daemon.json
 sudo systemctl restart docker
 
+# TODO create ssl cert
+
 # add group docker for run docker commands without sudo
 sudo groupadd docker
 

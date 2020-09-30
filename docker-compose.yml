@@ -23,7 +23,7 @@ services:
 
   pgadmin:
     container_name: pgadmin
-    image: dpage/pgadmin4:4.23
+    image: dpage/pgadmin4:4.26
     environment:
       PGADMIN_DEFAULT_EMAIL: $PGADMIN_DEFAULT_EMAIL
       PGADMIN_DEFAULT_PASSWORD: $PGADMIN_DEFAULT_PASSWORD
@@ -34,7 +34,7 @@ services:
       - ./$WEBHOOK_SSL_CERT:/certs/server.cert:ro
       - ./$WEBHOOK_SSL_PRIV:/certs/server.key:ro
     ports:
-      - 443:443
+      - 8443:8443
     networks:
       - test_backend
     restart: always
@@ -59,6 +59,13 @@ services:
     # устанавливаем зависимость от db, что гарантирует запуск бд до запуска приложения
     depends_on:
       - db
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - web
 
 # указываются используемые сети
 networks:
